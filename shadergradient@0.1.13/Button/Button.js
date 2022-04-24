@@ -1,47 +1,122 @@
-// src/Button/Button.tsx
-import React from "react";
-import { motion } from "framer-motion";
-
-// esbuild-css-modules-plugin-namespace:/tmp/tmp-1888-R9180IZW37lX/shadergradient/src/Button/Button.module.css.js
-var digest = "ad6cb894db4f56b117bba1c91f3bf0e1b0e1cfabcae48ea3bcdefd0d4aa51c90";
-var css = `._button_ztsmb_1 {
-  all: unset;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: bisque;
-  color: rgba(0, 0, 0, 0.8);
-  font-weight: 700;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  padding: 8px;
-  border-radius: 1000px; }
-  ._button_ztsmb_1 span {
-    background: rgba(0, 0, 0, 0.08);
-    width: 28px;
-    height: 28px;
-    border-radius: 1000px;
-    display: flex;
-    justify-content: center;
-    align-items: center; }
-`;
-(function() {
-  if (!document.getElementById(digest)) {
-    var ele = document.createElement("style");
-    ele.id = digest;
-    ele.textContent = css;
-    document.head.appendChild(ele);
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
-})();
-var Button_module_css_default = { "button": "_button_ztsmb_1" };
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+
+// node_modules/classnames/index.js
+var require_classnames = __commonJS({
+  "node_modules/classnames/index.js"(exports, module) {
+    (function() {
+      "use strict";
+      var hasOwn = {}.hasOwnProperty;
+      function classNames() {
+        var classes = [];
+        for (var i = 0; i < arguments.length; i++) {
+          var arg = arguments[i];
+          if (!arg)
+            continue;
+          var argType = typeof arg;
+          if (argType === "string" || argType === "number") {
+            classes.push(arg);
+          } else if (Array.isArray(arg)) {
+            if (arg.length) {
+              var inner = classNames.apply(null, arg);
+              if (inner) {
+                classes.push(inner);
+              }
+            }
+          } else if (argType === "object") {
+            if (arg.toString === Object.prototype.toString) {
+              for (var key in arg) {
+                if (hasOwn.call(arg, key) && arg[key]) {
+                  classes.push(key);
+                }
+              }
+            } else {
+              classes.push(arg.toString());
+            }
+          }
+        }
+        return classes.join(" ");
+      }
+      if (typeof module !== "undefined" && module.exports) {
+        classNames.default = classNames;
+        module.exports = classNames;
+      } else if (typeof define === "function" && typeof define.amd === "object" && define.amd) {
+        define("classnames", [], function() {
+          return classNames;
+        });
+      } else {
+        window.classNames = classNames;
+      }
+    })();
+  }
+});
 
 // src/Button/Button.tsx
-function Button({ title = "Title" }) {
-  return /* @__PURE__ */ React.createElement(motion.button, {
-    className: Button_module_css_default.button,
-    whileHover: { scale: 0.9 },
-    whileTap: { scale: 0.7 }
-  }, title, /* @__PURE__ */ React.createElement("span", null, "\u{1F440}"));
-}
+var import_classnames = __toESM(require_classnames());
+import * as React from "react";
+var ButtonKind = {
+  primary: "bg-primary text-white",
+  secondary: "ring-1 ring-primary text-primary"
+};
+var Button = (_a) => {
+  var _b = _a, {
+    kind = "primary",
+    children
+  } = _b, rest = __objRest(_b, [
+    "kind",
+    "children"
+  ]);
+  return /* @__PURE__ */ React.createElement("button", __spreadValues({
+    className: (0, import_classnames.default)("h-button font-medium rounded w-full", ButtonKind[kind])
+  }, rest), children);
+};
 export {
   Button
 };
+/*!
+  Copyright (c) 2018 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
