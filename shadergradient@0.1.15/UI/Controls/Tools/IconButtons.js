@@ -84,7 +84,7 @@ var require_classnames = __commonJS({
 // src/UI/Controls/Tools/IconButtons.tsx
 var import_classnames = __toESM(require_classnames());
 import * as React from "react";
-import { IconHoverBox } from "../../../HoverBox/index.js";
+import { IconHoverBox } from "../../../UI/index.js";
 import { Feather } from "./Feather.js";
 var IconButtons = (_a) => {
   var _b = _a, {
