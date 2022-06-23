@@ -70,6 +70,7 @@ var require_classnames = __commonJS({
 // src/UI/PropertyControls.tsx
 var import_classnames = __toESM(require_classnames());
 import * as React from "react";
+import { motion } from "framer-motion";
 import { useQueryState } from "../hooks/index.js";
 import {
   ShapeControls,
@@ -77,6 +78,7 @@ import {
   EffectControls,
   ViewControls
 } from "../UI/index.js";
+var tabHeights = { shape: 324, colors: 274, effects: 174, view: 224 };
 var PropertyControls = ({
   activeTab,
   setActiveTab
@@ -84,9 +86,16 @@ var PropertyControls = ({
   const [type] = useQueryState("type");
   if (!type)
     return null;
-  return /* @__PURE__ */ React.createElement("div", {
-    className: (0, import_classnames.default)("w-full h-[fit-content] overflow-y-scroll bg-controls-panel-mobile text-primary mx-auto p-3.5 md:h-full md:p-3.5 relative hide-scrollbar"),
-    style: { display: activeTab === "none" ? "none" : "block" }
+  return /* @__PURE__ */ React.createElement(motion.div, {
+    className: (0, import_classnames.default)("w-full overflow-y-scroll bg-controls-panel-mobile text-primary mx-auto md:h-full relative hide-scrollbar"),
+    style: {
+      originY: 1
+    },
+    animate: {
+      height: activeTab === "none" ? 0 : tabHeights[activeTab],
+      padding: activeTab === "none" ? 0 : 20
+    },
+    transition: { duration: 0.72 }
   }, activeTab === "shape" && /* @__PURE__ */ React.createElement(ShapeControls, null), activeTab === "colors" && /* @__PURE__ */ React.createElement(ColorControls, null), activeTab === "effects" && /* @__PURE__ */ React.createElement(EffectControls, null), activeTab === "view" && /* @__PURE__ */ React.createElement(ViewControls, null));
 };
 export {

@@ -24134,12 +24134,11 @@ if (typeof window !== "undefined") {
 }
 
 // src/Gradient/comps/GradientMesh/GradientMesh.tsx
-import { aboutPositions, aboutRotations } from "../../../consts.js";
 import { usePropertyStore } from "../../../store.js";
 import { dToRArr, useFiber } from "../../../utils/index.js";
+import { lineMaterial } from "./lineMaterial.js";
 import { shaderMaterial } from "./shaderMaterial.js";
 import * as shaders from "./shaders/index.js";
-var meshCount = 192;
 var clock = new Clock();
 var GradientMesh = ({
   type,
@@ -24167,8 +24166,18 @@ var GradientMesh = ({
   let sceneShader = shaders.defaults[type != null ? type : "plane"];
   if (shader && shader !== "defaults")
     sceneShader = shaders[shader];
+  const hoverState = usePropertyStore((state) => state.hoverState);
+  const meshCount = 192;
+  const meshLineCount = 36;
+  useEffect(() => {
+    if (hoverState !== 0) {
+      usePropertyStore.setState({ zoomOut: true });
+    } else {
+      usePropertyStore.setState({ zoomOut: false });
+    }
+  }, [hoverState]);
   const ColorShiftMaterial = shaderMaterial({
-    colors: [color1, color2, color3],
+    colors: getHoverColor(hoverState, [color1, color2, color3]),
     uTime,
     uSpeed,
     uNoiseDensity: uDensity,
@@ -24177,21 +24186,39 @@ var GradientMesh = ({
     uAmplitude,
     uIntensity: 0.5
   }, sceneShader.vertex, sceneShader.fragment);
-  const inAbout = usePropertyStore((state) => state.inAbout);
+  const HoveredLineMaterial = lineMaterial({
+    uTime,
+    uSpeed,
+    uNoiseDensity: uDensity,
+    uNoiseStrength: uStrength,
+    uFrequency,
+    uAmplitude,
+    uIntensity: 0.5
+  }, sceneShader.vertex);
   ColorShiftMaterial.key = MathUtils.generateUUID();
   extend({ ColorShiftMaterial });
+  HoveredLineMaterial.key = MathUtils.generateUUID();
+  extend({ HoveredLineMaterial });
   const material = useRef();
+  const linemat = useRef();
   useFrame((state, delta) => {
-    if (animate === "on")
+    if (animate === "on") {
       material.current.userData.uTime.value = clock.getElapsedTime();
+      if (linemat.current !== void 0) {
+        linemat.current.userData.uTime.value = clock.getElapsedTime();
+      }
+    }
   });
   useEffect(() => {
     material.current.userData.uTime.value = uTime;
+    if (linemat.current !== void 0) {
+      linemat.current.userData.uTime.value = uTime;
+    }
     material.current.roughness = 1 - reflection;
   }, [uTime, reflection]);
-  return /* @__PURE__ */ React.createElement("mesh", {
-    position: inAbout === true ? [aboutPositions[0], aboutPositions[1], aboutPositions[2]] : [positionX, positionY, positionZ],
-    rotation: inAbout === true ? dToRArr([aboutRotations[0], aboutRotations[1], aboutRotations[2]]) : dToRArr([rotationX, rotationY, rotationZ])
+  return /* @__PURE__ */ React.createElement("group", null, /* @__PURE__ */ React.createElement("mesh", {
+    position: [positionX, positionY, positionZ],
+    rotation: dToRArr([rotationX, rotationY, rotationZ])
   }, type === "plane" && /* @__PURE__ */ React.createElement("planeGeometry", {
     args: [10, 10, 1, meshCount]
   }), type === "sphere" && /* @__PURE__ */ React.createElement("icosahedronBufferGeometry", {
@@ -24201,8 +24228,32 @@ var GradientMesh = ({
   }), /* @__PURE__ */ React.createElement("colorShiftMaterial", {
     key: ColorShiftMaterial.key,
     ref: material
-  }));
+  })), /* @__PURE__ */ React.createElement("mesh", null, /* @__PURE__ */ React.createElement("lineSegments", {
+    renderOrder: 1,
+    position: [positionX, positionY, positionZ],
+    rotation: dToRArr([rotationX, rotationY, rotationZ]),
+    visible: hoverState !== 0 ? true : false
+  }, type === "plane" && /* @__PURE__ */ React.createElement("planeGeometry", {
+    args: [10, 10, 1, meshLineCount]
+  }), type === "sphere" && /* @__PURE__ */ React.createElement("icosahedronBufferGeometry", {
+    args: [1, meshLineCount / 3]
+  }), type === "waterPlane" && /* @__PURE__ */ React.createElement("planeGeometry", {
+    args: [10, 10, meshLineCount, meshLineCount]
+  }), /* @__PURE__ */ React.createElement("hoveredLineMaterial", {
+    key: HoveredLineMaterial.key,
+    ref: linemat
+  }))));
 };
+function getHoverColor(hoverState, colors) {
+  if (hoverState === 1)
+    return [colors[0], "#000000", "#000000"];
+  else if (hoverState === 2)
+    return ["#000000", colors[1], "#000000"];
+  else if (hoverState === 3)
+    return ["#000000", "#000000", colors[2]];
+  else
+    return [colors[0], colors[1], colors[2]];
+}
 export {
   GradientMesh
 };
