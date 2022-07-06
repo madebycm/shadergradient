@@ -1,28 +1,42 @@
 var __defProp = Object.defineProperty;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
 // ../../node_modules/camera-controls/dist/camera-controls.module.js
-var ACTION;
-(function(ACTION2) {
-  ACTION2[ACTION2["NONE"] = 0] = "NONE";
-  ACTION2[ACTION2["ROTATE"] = 1] = "ROTATE";
-  ACTION2[ACTION2["TRUCK"] = 2] = "TRUCK";
-  ACTION2[ACTION2["OFFSET"] = 3] = "OFFSET";
-  ACTION2[ACTION2["DOLLY"] = 4] = "DOLLY";
-  ACTION2[ACTION2["ZOOM"] = 5] = "ZOOM";
-  ACTION2[ACTION2["TOUCH_ROTATE"] = 6] = "TOUCH_ROTATE";
-  ACTION2[ACTION2["TOUCH_TRUCK"] = 7] = "TOUCH_TRUCK";
-  ACTION2[ACTION2["TOUCH_OFFSET"] = 8] = "TOUCH_OFFSET";
-  ACTION2[ACTION2["TOUCH_DOLLY"] = 9] = "TOUCH_DOLLY";
-  ACTION2[ACTION2["TOUCH_ZOOM"] = 10] = "TOUCH_ZOOM";
-  ACTION2[ACTION2["TOUCH_DOLLY_TRUCK"] = 11] = "TOUCH_DOLLY_TRUCK";
-  ACTION2[ACTION2["TOUCH_DOLLY_OFFSET"] = 12] = "TOUCH_DOLLY_OFFSET";
-  ACTION2[ACTION2["TOUCH_ZOOM_TRUCK"] = 13] = "TOUCH_ZOOM_TRUCK";
-  ACTION2[ACTION2["TOUCH_ZOOM_OFFSET"] = 14] = "TOUCH_ZOOM_OFFSET";
-})(ACTION || (ACTION = {}));
+var ACTION = Object.freeze({
+  NONE: 0,
+  ROTATE: 1,
+  TRUCK: 2,
+  OFFSET: 3,
+  DOLLY: 4,
+  ZOOM: 5,
+  TOUCH_ROTATE: 6,
+  TOUCH_TRUCK: 7,
+  TOUCH_OFFSET: 8,
+  TOUCH_DOLLY: 9,
+  TOUCH_ZOOM: 10,
+  TOUCH_DOLLY_TRUCK: 11,
+  TOUCH_DOLLY_OFFSET: 12,
+  TOUCH_ZOOM_TRUCK: 13,
+  TOUCH_ZOOM_OFFSET: 14
+});
 function isPerspectiveCamera(camera) {
   return camera.isPerspectiveCamera;
 }
@@ -120,7 +134,6 @@ var EventDispatcher = class {
 var isBrowser = typeof window !== "undefined";
 var isMac = isBrowser && /Mac/.test(navigator.platform);
 var isPointerEventsNotSupported = !(isBrowser && "PointerEvent" in window);
-var readonlyACTION = Object.freeze(ACTION);
 var TOUCH_DOLLY_FACTOR = 1 / 8;
 var THREE;
 var _ORIGIN;
@@ -133,6 +146,8 @@ var _v3C;
 var _xColumn;
 var _yColumn;
 var _zColumn;
+var _deltaTarget;
+var _deltaOffset;
 var _sphericalA;
 var _sphericalB;
 var _box3A;
@@ -629,6 +644,8 @@ var CameraControls = class extends EventDispatcher {
     _xColumn = new THREE.Vector3();
     _yColumn = new THREE.Vector3();
     _zColumn = new THREE.Vector3();
+    _deltaTarget = new THREE.Vector3();
+    _deltaOffset = new THREE.Vector3();
     _sphericalA = new THREE.Spherical();
     _sphericalB = new THREE.Spherical();
     _box3A = new THREE.Box3();
@@ -640,7 +657,7 @@ var CameraControls = class extends EventDispatcher {
     _raycaster = new THREE.Raycaster();
   }
   static get ACTION() {
-    return readonlyACTION;
+    return ACTION;
   }
   get camera() {
     return this._camera;
@@ -818,7 +835,7 @@ var CameraControls = class extends EventDispatcher {
     const phi = roundToStep(this._sphericalEnd.phi, PI_HALF);
     promises.push(this.rotateTo(theta, phi, enableTransition));
     const normal = _v3A.setFromSpherical(this._sphericalEnd).normalize();
-    const rotation = _quaternionA.setFromUnitVectors(normal, _AXIS_Z);
+    const rotation = _quaternionA.setFromUnitVectors(normal, _AXIS_Z).multiply(this._yAxisUpSpaceInverse);
     const viewFromPolar = approxEquals(Math.abs(normal.y), 1);
     if (viewFromPolar) {
       rotation.multiply(_quaternionB.setFromAxisAngle(_AXIS_Y, theta));
@@ -862,10 +879,6 @@ var CameraControls = class extends EventDispatcher {
       promises.push(this.setFocalOffset(0, 0, 0, enableTransition));
     }
     return Promise.all(promises);
-  }
-  fitTo(box3OrObject, enableTransition, fitToOptions = {}) {
-    console.warn("camera-controls: fitTo() has been renamed to fitToBox()");
-    return this.fitToBox(box3OrObject, enableTransition, fitToOptions);
   }
   fitToSphere(sphereOrMesh, enableTransition) {
     const promises = [];
@@ -984,10 +997,6 @@ var CameraControls = class extends EventDispatcher {
     const heightToFit = boundingRectAspect < aspect2 ? height : width / aspect2;
     return heightToFit * 0.5 / Math.tan(fov2 * 0.5) + depth * 0.5;
   }
-  getDistanceToFit(width, height, depth) {
-    console.warn("camera-controls: getDistanceToFit() has been renamed to getDistanceToFitBox()");
-    return this.getDistanceToFitBox(width, height, depth);
-  }
   getDistanceToFitSphere(radius) {
     if (notSupportedInOrthographicCamera(this._camera, "getDistanceToFitSphere"))
       return this._spherical.radius;
@@ -1037,8 +1046,8 @@ var CameraControls = class extends EventDispatcher {
     const deltaTheta = this._sphericalEnd.theta - this._spherical.theta;
     const deltaPhi = this._sphericalEnd.phi - this._spherical.phi;
     const deltaRadius = this._sphericalEnd.radius - this._spherical.radius;
-    const deltaTarget = _v3A.subVectors(this._targetEnd, this._target);
-    const deltaOffset = _v3B.subVectors(this._focalOffsetEnd, this._focalOffset);
+    const deltaTarget = _deltaTarget.subVectors(this._targetEnd, this._target);
+    const deltaOffset = _deltaOffset.subVectors(this._focalOffsetEnd, this._focalOffset);
     if (!approxZero(deltaTheta) || !approxZero(deltaPhi) || !approxZero(deltaRadius) || !approxZero(deltaTarget.x) || !approxZero(deltaTarget.y) || !approxZero(deltaTarget.z) || !approxZero(deltaOffset.x) || !approxZero(deltaOffset.y) || !approxZero(deltaOffset.z)) {
       this._spherical.set(this._spherical.radius + deltaRadius * lerpRatio, this._spherical.phi + deltaPhi * lerpRatio, this._spherical.theta + deltaTheta * lerpRatio);
       this._target.add(deltaTarget.multiplyScalar(lerpRatio));
@@ -1095,10 +1104,10 @@ var CameraControls = class extends EventDispatcher {
     if (this._boundaryEnclosesCamera) {
       this._encloseToBoundary(this._camera.position.copy(this._target), _v3A.setFromSpherical(this._spherical).applyQuaternion(this._yAxisUpSpaceInverse), 1);
     }
-    const zoomDelta = this._zoomEnd - this._zoom;
-    this._zoom += zoomDelta * lerpRatio;
+    const deltaZoom = this._zoomEnd - this._zoom;
+    this._zoom += deltaZoom * lerpRatio;
     if (this._camera.zoom !== this._zoom) {
-      if (approxZero(zoomDelta))
+      if (approxZero(deltaZoom))
         this._zoom = this._zoomEnd;
       this._camera.zoom = this._zoom;
       this._camera.updateProjectionMatrix();
@@ -1112,7 +1121,7 @@ var CameraControls = class extends EventDispatcher {
       this.dispatchEvent({ type: "update" });
     } else if (updated) {
       this.dispatchEvent({ type: "update" });
-      if (approxZero(deltaTheta, this.restThreshold) && approxZero(deltaPhi, this.restThreshold) && approxZero(deltaRadius, this.restThreshold) && approxZero(deltaTarget.x, this.restThreshold) && approxZero(deltaTarget.y, this.restThreshold) && approxZero(deltaTarget.z, this.restThreshold) && approxZero(deltaOffset.x, this.restThreshold) && approxZero(deltaOffset.y, this.restThreshold) && approxZero(deltaOffset.z, this.restThreshold) && !this._hasRested) {
+      if (approxZero(deltaTheta, this.restThreshold) && approxZero(deltaPhi, this.restThreshold) && approxZero(deltaRadius, this.restThreshold) && approxZero(deltaTarget.x, this.restThreshold) && approxZero(deltaTarget.y, this.restThreshold) && approxZero(deltaTarget.z, this.restThreshold) && approxZero(deltaOffset.x, this.restThreshold) && approxZero(deltaOffset.y, this.restThreshold) && approxZero(deltaOffset.z, this.restThreshold) && approxZero(deltaZoom, this.restThreshold) && !this._hasRested) {
         this._hasRested = true;
         this.dispatchEvent({ type: "rest" });
       }
@@ -30051,7 +30060,12 @@ if (typeof window !== "undefined") {
 // src/Gradient/comps/CameraControl/CameraControl.tsx
 import { useFiber } from "../../../utils/index.js";
 import { useCameraAnimation } from "./useCameraAnimation.js";
-function CameraControl(props) {
+function CameraControl(_a) {
+  var _b = _a, {
+    dampingFactor = 0.05
+  } = _b, props = __objRest(_b, [
+    "dampingFactor"
+  ]);
   const { extend, useThree, useFrame } = useFiber();
   CameraControls.install({ THREE: three_module_exports });
   extend({ CameraControls });
@@ -30061,7 +30075,8 @@ function CameraControl(props) {
   useFrame((state, delta) => ref.current.update(delta));
   return /* @__PURE__ */ React.createElement("cameraControls", {
     ref,
-    args: [camera, gl.domElement]
+    args: [camera, gl.domElement],
+    dampingFactor
   });
 }
 export {
