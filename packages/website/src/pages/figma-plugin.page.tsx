@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 
 const FigmaPlugin: any = dynamic(
   () =>
-    import('https://framer.com/m/Figma-Plugin-SHx3.js@zwuqIVkWbw5ViWhG76UT'),
+    import('https://framer.com/m/Figma-Plugin-SHx3.js@71yuttd9o5OzeP8CMHd3'),
   { ssr: false }
 )
 
@@ -12,6 +12,8 @@ const DOM = () => {
   useEffect(() => {
     window.React = React
   }, [])
+
+  console.log('remove the gradient comp')
 
   return <FigmaPlugin style={{ width: '100%', height: '100%' }} />
 }
