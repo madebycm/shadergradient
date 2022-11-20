@@ -47,28 +47,10 @@ var ShapeControls = () => {
     label: "Defaults"
   }), /* @__PURE__ */ React.createElement(Radio, {
     name: "shader",
-    value: "snakeHalftone",
+    value: "positionMix",
     setValue: setShader,
-    check: shader === "snakeHalftone",
-    label: "SnakeHalftone"
-  }), /* @__PURE__ */ React.createElement(Radio, {
-    name: "shader",
-    value: "noise",
-    setValue: setShader,
-    check: shader === "noise",
-    label: "noise"
-  }), /* @__PURE__ */ React.createElement(Radio, {
-    name: "shader",
-    value: "grain",
-    setValue: setShader,
-    check: shader === "grain",
-    label: "grain"
-  }), /* @__PURE__ */ React.createElement(Radio, {
-    name: "shader",
-    value: "whatthe",
-    setValue: setShader,
-    check: shader === "whatthe",
-    label: "whatthe"
+    check: shader === "positionMix",
+    label: "Position Mix"
   })), /* @__PURE__ */ React.createElement(InputPanel, {
     title: "Animate"
   }, /* @__PURE__ */ React.createElement(Radio, {
@@ -142,7 +124,7 @@ var ShapeControls = () => {
     min: 0,
     max: 7
   })), /* @__PURE__ */ React.createElement(InputPanel, {
-    title: "pixelDensity"
+    title: "Pixel Density"
   }, /* @__PURE__ */ React.createElement(Slider, {
     defaultValue: pixelDensity,
     setValue: setPixelDensity,
