@@ -1,10 +1,4 @@
-export * from './Gradient/index'
-export * from './UI/index'
-
-export * from './utils/index'
-export * from './hooks/index'
-export * from './store'
-export * from './presets'
-export * from './consts'
-
-export * from './Box/index'
+import * as React from "react";
+export * from "./Button";
+export * from "./Card";
+export * from "./Box/index";
