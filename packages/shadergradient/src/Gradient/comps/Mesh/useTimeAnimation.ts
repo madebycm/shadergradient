@@ -5,7 +5,7 @@ import * as THREE from 'three'
 
 const { to, rotDur, meshDur, rotDelay, meshDelay } = mainLoading
 
-const clock = new THREE.Clock()
+export const clock = new THREE.Clock()
 //t = current time
 //b = start value
 //c = change in value
@@ -13,14 +13,24 @@ const clock = new THREE.Clock()
 
 const increment = 20
 
-export function useTimeAnimation({ animate }) {
+export function useTimeAnimation({ animate, range, rangeStart, rangeEnd }) {
   const material: any = useRef()
   const linemat: any = useRef()
 
   let currentTime = 0
   useFrame((state, delta) => {
     if (material.current) {
-      const elapsed = clock.getElapsedTime()
+      let elapsed = clock.getElapsedTime()
+
+      if (range === 'enabled') {
+        elapsed = rangeStart
+        elapsed = elapsed + clock.getElapsedTime()
+
+        if (elapsed >= rangeEnd) {
+          elapsed = rangeStart
+          clock.start() // restart the clock
+        }
+      }
 
       // loading animation
       if (elapsed > meshDelay) {
