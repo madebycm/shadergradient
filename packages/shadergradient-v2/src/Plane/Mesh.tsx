@@ -6,8 +6,10 @@ import * as THREE from 'three'
 
 const amplitude = 2
 
-export function Mesh({ width, height }) {
+export function Mesh({ width, height, position, rotation }) {
   const materialRef = useRef()
+  const { positionX, positionY, positionZ } = position
+  const { rotationX, rotationY, rotationZ } = rotation
 
   useFrame(({ clock }) => {
     const elapsedTime = clock.getElapsedTime()
@@ -18,7 +20,10 @@ export function Mesh({ width, height }) {
   })
 
   return (
-    <mesh rotation={[degToRad(0), degToRad(0), degToRad(0)]}>
+    <mesh
+      rotation={[degToRad(rotationX), degToRad(rotationY), degToRad(rotationZ)]}
+      position={[positionX, positionY, positionZ]}
+    >
       <planeGeometry args={[width, height, 1, 1]} />
       <shaderMaterial
         ref={materialRef}

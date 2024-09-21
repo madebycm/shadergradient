@@ -4,7 +4,7 @@ uniform float u_amplitude;
 
 void main() {
     // Calculate z-offset based on time and position
-    float zOffset = sin(position.x + u_time) * u_amplitude;
+    float zOffset = sin(position.x + u_time) * u_amplitude + cos(position.y + u_time) * u_amplitude;
     
     // Apply the offset to the vertex position
     vec3 newPosition = vec3(position.x, position.y, position.z + zOffset);
